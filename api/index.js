@@ -166,6 +166,7 @@ app.get('/', async (req, res) => {
 
 
 app.get('/books', async (req, res) => {
+  await getUpdates();
   try {
     const books = await Book.find();
     res.json(books);
@@ -177,14 +178,12 @@ app.get('/books', async (req, res) => {
 
 app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
-  await getUpdates();
 });
 
 async function getUpdates() {
   try {
     const response = await axios.get(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates`);
     const updates = response.data.result;
-
     for (const update of updates) {
       if (update.channel_post && update.channel_post.chat.username === CHANNEL_ID) {
         const existingBook = await Book.findOne({ title: update.channel_post.text });
